@@ -41,24 +41,27 @@ if __name__ == '__main__':
 
     # Découpage de l'extrait de 10 secondes
     duration = int(10 * fs)
-    extract = s[0:duration]
+    extract = s[10:duration+10]
 
     # 4: Extraction de la signature (Q1 à Q3)
     encoder.process(fs, extract)
+    encoder.process(fs, extract)
+
     hashes = encoder.hashes 
-
-    # 5: Comparaison avec un morceau RANDOM de la base (Q6)
-    random_item = random.choice(database)
-    print(f"Comparaison avec le morceau de la base : {random_item['song']}")
-
-    # Création de l'objet de comparaison
-    matcher_random = Matching(hashes, random_item['hashcodes'])
-
-    # 6: Visualisation (Q5 et Q6)
-    print(f"Nombre de correspondances : {len(matcher_random.matching)}")
     
-    # Nuage de points (doit être éparpillé)
-    matcher_random.display_scatterplot() 
-    
-    # Histogramme des offsets (doit être plat)
-    matcher_random.display_histogram() 
+    for entry in database:
+        # On compare l'extrait (hashes) avec chaque morceau de la base (entry['hashcodes'])
+        matcher = Matching(hashes, entry['hashcodes'])
+        
+        # Le critère le plus simple : si on a beaucoup de points communs (ex: > 20)
+        # c'est que c'est le bon morceau[cite: 56, 57].
+        if len(matcher.matching) > 20:
+            print(f"Match trouvé : {entry['song']} !")
+            
+            # Affichage du nuage de points (Question 5) [cite: 50]
+            matcher.display_scatterplot()
+            
+            # Affichage de l'histogramme des offsets (Question 6) 
+            matcher.display_histogram()
+            
+            break # On s'arrête dès qu'on a trouvé le morceau
