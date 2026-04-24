@@ -104,21 +104,24 @@ class Encoding:
 
         self.hashes = []
         for a in self.anchors:
-            fa, ta = a[0], a[1]
+            # a[0] est l'indice de fréquence, a[1] est l'indice de temps
+            idx_fa, idx_ta = a[0], a[1]
+            fa, ta = self.f[idx_fa], self.t[idx_ta]
  
-            #Différences de temps et de fréquence
-            dt = self.anchors[:, 1] - ta
-            df = np.abs(self.anchors[:, 0] - fa)
+            # Différences de temps et de fréquence avec TOUTES les autres ancres
+            dt = self.t[self.anchors[:, 1]] - ta
+            df = np.abs(self.f[self.anchors[:, 0]] - fa)
  
-            #On utilise un masque (qui vérifie que pour chaque point on vérifie la condition) - à la place de faire une boucle
+            # Masque pour respecter les conditions : 0 < dt <= Delta_t et |df| < Delta_f [cite: 32, 40]
             mask = (dt > 0) & (dt <= self.time_window) & (df < self.freq_window)
  
-            #On stocke les informations des points valides 
-            for cible in self.anchors[mask]:
-                fi, ti = cible[0], cible[1]
+            # On stocke les couples ancre/cible valides [cite: 34, 38, 39]
+            targets = self.anchors[mask]
+            for cible in targets:
+                fi = self.f[cible[0]]
+                ti = self.t[cible[1]]
+                # Format demandé : (dt, fa, fi) associé au temps ta [cite: 38]
                 self.hashes.append({"t": ta, "hash": np.array([ti - ta, fa, fi])})
-            
-
 
     def display_spectrogram(self, display_anchors=True):
 
@@ -136,7 +139,7 @@ class Encoding:
         plt.xlabel('Time [s]')
         plt.ylabel('Frequency [kHz]')
         if(display_anchors):
-            plt.scatter(self.anchors[:, 0], self.anchors[:, 1]/1e3)
+            plt.scatter(self.t[self.anchors[:, 1]], self.f[self.anchors[:, 0]]/1e3)
         plt.show()
 
 # ----------------------------------------------------------------------------
@@ -211,7 +214,7 @@ class Matching:
              t = hc['t']
              h = hc['hash'][np.newaxis, :]
              dist = np.sum(np.abs(hashcodes - h), axis=1)
-             mask = (dist < 1e-6)
+             mask = (dist < 1e-3)
              if (mask != 0).any():
                  self.matching.append(np.array([times[mask][0], t]))
         self.matching = np.array(self.matching)
@@ -235,15 +238,8 @@ class Matching:
         """
         Affiche le nuage de points s'il y a des correspondances
         """
-        # On vérifie si matching n'est pas vide et possède bien 2 colonnes
-        if self.matching.ndim == 2 and self.matching.shape[0] > 0:
-            plt.scatter(self.matching[:, 0], self.matching[:, 1])
-            plt.xlabel('Temps extrait (s)')
-            plt.ylabel('Temps morceau (s)')
-            plt.title('Nuage de points des correspondances')
-            plt.show()
-        else:
-            print("Aucune correspondance trouvée : impossible d'afficher le nuage de points.")
+        plt.scatter(self.matching[:, 0], self.matching[:, 1])
+        plt.show()
         
 
     def display_histogram(self):
@@ -253,9 +249,6 @@ class Matching:
         """
     
         plt.hist(self.offsets, bins=100, density=True)
-        plt.xlabel('Offset (s)')
-        plt.ylabel("Nombre de correspondance")
-        plt.title("Histogramme des décalages temporels")
         plt.show()
 
 
