@@ -27,7 +27,7 @@ class Encoding:
 
     """
 
-    def __init__(self):
+    def __init__(self, nperseg=128, noverlap=32, min_distance=50, time_window=1.0, freq_window=1500):
 
         """
         Class constructor
@@ -45,8 +45,12 @@ class Encoding:
 
         All these parameters should be kept as attributes of the class.
         """
+        self.nperseg= nperseg
+        self.noverlap= noverlap
+        self.min_distance= min_distance
+        self.time_window= time_window  
+        self.freq_window= freq_window
 
-        # Insert code here
 
 
     def process(self, fs, s):
@@ -83,15 +87,40 @@ class Encoding:
            sampled signal
         """
 
-        self.fs=fs
-        self.s=s
+        self.fs = fs
+        self.s = s
 
         # Insert code here
+        #On calcule le spectrogramme grâce à scipy.signal.spectrogram
+        self.f, self.t, self.S = spectrogram(s, fs=fs, nperseg=self.nperseg, noverlap=self.noverlap)
 
+
+        #Pour ne garder que les maxima locaux du spectrogramme pour réduire la quantité de données, 
+        #on utilise peak_local_max de scikit-image
+        self.anchors = peak_local_max(self.S, min_distance=self.min_distance, exclude_border=False)
+
+        #self.anchors : on fait un tableau de taille (N, 2) avec les colonnes temps et fréquence
         
 
+        self.hashes = []
+        for a in self.anchors:
+            fa, ta = a[0], a[1]
+ 
+            #Différences de temps et de fréquence
+            dt = self.anchors[:, 1] - ta
+            df = np.abs(self.anchors[:, 0] - fa)
+ 
+            #On utilise un masque (qui vérifie que pour chaque point on vérifie la condition) - à la place de faire une boucle
+            mask = (dt > 0) and (dt <= self.time_window) and (df < self.freq_window)
+ 
+            #On stocke les informations des points valides 
+            for cible in self.anchors[mask]:
+                fi, ti = cible[0], cible[1]
+                self.hashes.append({"t": ta, "hash": np.array([ti - ta, fa, fi])})
+            
 
-    def display_spectrogram(self):
+
+    def display_spectrogram(self, display_anchors=True):
 
         """
         Display the spectrogram of the audio signal
@@ -109,8 +138,6 @@ class Encoding:
         if(display_anchors):
             plt.scatter(self.anchors[:, 0], self.anchors[:, 1]/1e3)
         plt.show()
-
-
 
 # ----------------------------------------------------------------------------
 # Compares two set of hashes in order to determine if two audio files match

@@ -11,7 +11,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from scipy.io.wavfile import read
-from song_recognition.main import *
+from algorithm import * #merci à Titouan Drouynot qui nous a fait remarquer l'erreur
 
 
 # ----------------------------------------------
@@ -19,7 +19,7 @@ from song_recognition.main import *
 # ----------------------------------------------
 if __name__ == '__main__':
 
-    folder = '../samples/'
+    folder = 'C:\git\Maths\samples/'
 
     # 1: Load the audio files
     import os
