@@ -83,10 +83,12 @@ class Encoding:
            sampled signal
         """
 
-        self.fs = fs
-        self.s = s
+        self.fs=fs
+        self.s=s
 
         # Insert code here
+
+        
 
 
     def display_spectrogram(self):
