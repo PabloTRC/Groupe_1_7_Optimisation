@@ -51,6 +51,6 @@ if __name__ == '__main__':
           'hashcodes': encoder.hashes})
 
     # 4: Save the database
-    with open('songs.pickle', 'wb') as handle:
+    with open('songs2.pickle', 'wb') as handle:
         pickle.dump(database, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
