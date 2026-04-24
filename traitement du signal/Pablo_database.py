@@ -11,7 +11,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from scipy.io.wavfile import read
-from algorithm import * #merci à Titouan Drouynot qui nous a fait remarquer l'erreur
+from pablo_trait import * #merci à Titouan Drouynot qui nous a fait remarquer l'erreur
 
 
 # ----------------------------------------------
@@ -19,7 +19,7 @@ from algorithm import * #merci à Titouan Drouynot qui nous a fait remarquer l'e
 # ----------------------------------------------
 if __name__ == '__main__':
 
-    folder = './samples/'
+    folder = 'C:/Users/thoum/Groupe_1_7_Optimisation/traitement du signal/samples/'
 
     # 1: Load the audio files
     import os
@@ -51,6 +51,6 @@ if __name__ == '__main__':
           'hashcodes': encoder.hashes})
 
     # 4: Save the database
-    with open('songs2.pickle', 'wb') as handle:
+    with open('songs3.pickle', 'wb') as handle:
         pickle.dump(database, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
