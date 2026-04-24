@@ -111,7 +111,7 @@ class Encoding:
             df = np.abs(self.anchors[:, 0] - fa)
  
             #On utilise un masque (qui vérifie que pour chaque point on vérifie la condition) - à la place de faire une boucle
-            mask = (dt > 0) and (dt <= self.time_window) and (df < self.freq_window)
+            mask = (dt > 0) & (dt <= self.time_window) & (df < self.freq_window)
  
             #On stocke les informations des points valides 
             for cible in self.anchors[mask]:

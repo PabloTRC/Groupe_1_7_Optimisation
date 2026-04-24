@@ -42,6 +42,8 @@ if __name__ == '__main__':
     for audiofile in audiofiles:
 
         fs, s = read(folder + '/' + audiofile)
+        if len(s.shape) > 1: #Si le fichier est en stéréo on a 2 colonnes donc ça pose problème
+            s = np.mean(s, axis=1)
         print('Song: ' + audiofile[:-4])
         print('Sampling frequency: ' + str(fs))
         encoder.process(fs, s)
