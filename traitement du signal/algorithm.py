@@ -221,18 +221,30 @@ class Matching:
         #    hashcodes that match
         # 2. implementing a criterion to decide whether or not both extracts
         #    match
+
+        # 1. Calcul des offsets (temps morceau - temps extrait)
+        if len(self.matching) > 0:
+            self.offsets = self.matching[:, 1] - self.matching[:, 0]
+            #matching[:, 0] c'est le temps dans l'extrait
+            #matching[:, 1] c'est le temps dans le morceau
+        else:
+            self.offsets = np.array([])
        
              
     def display_scatterplot(self):
-
         """
-        Display through a scatterplot the times associated to the hashes
-        that match
+        Affiche le nuage de points s'il y a des correspondances
         """
-    
-        plt.scatter(self.matching[:, 0], self.matching[:, 1])
-        plt.show()
-
+        # On vérifie si matching n'est pas vide et possède bien 2 colonnes
+        if self.matching.ndim == 2 and self.matching.shape[0] > 0:
+            plt.scatter(self.matching[:, 0], self.matching[:, 1])
+            plt.xlabel('Temps extrait (s)')
+            plt.ylabel('Temps morceau (s)')
+            plt.title('Nuage de points des correspondances')
+            plt.show()
+        else:
+            print("Aucune correspondance trouvée : impossible d'afficher le nuage de points.")
+        
 
     def display_histogram(self):
 
@@ -242,6 +254,8 @@ class Matching:
     
         plt.hist(self.offsets, bins=100, density=True)
         plt.xlabel('Offset (s)')
+        plt.ylabel("Nombre de correspondance")
+        plt.title("Histogramme des décalages temporels")
         plt.show()
 
 

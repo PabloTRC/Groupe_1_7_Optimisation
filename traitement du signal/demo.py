@@ -26,27 +26,39 @@ if __name__ == '__main__':
       time_window=time_window, 
       freq_window=freq_window)
       
-   
-    # 3: Randomly get an extract from one of the songs of the database
-    songs = [item for item in os.listdir('./samples') if item[:-4] != '.wav']
+   # 3: Récupérer un morceau au hasard
+    folder = 'C:/git/Maths/samples/'
+    # On liste tout le contenu sans filtre d'exclusion
+    songs = [f for f in os.listdir(folder) if f.endswith('.wav')]    
     song = random.choice(songs)
-    print('Selected song: ' + song[:-4])
-    filename = './samples/' + song
+    print('Selected song for extract: ' + song)
+    filename = folder + song
 
+    # Lecture et passage en mono (crucial pour le spectrogramme)
     fs, s = read(filename)
-    tstart = np.random.randint(20, 90)
-    tmin = int(tstart*fs)
-    duration = int(10*fs)
+    if len(s.shape) > 1:
+        s = np.mean(s, axis=1) 
 
-    # 4: Use the encoder to extract a signature from the extract
-    encoder.process(fs, s[tmin:tmin + duration])
-    hashes = encoder.hashes
+    # Découpage de l'extrait de 10 secondes
+    duration = int(10 * fs)
+    extract = s[0:duration]
 
-    # 5: TODO: Using the class Matching, compare the fingerprint to all the 
-    # fingerprints in the database
+    # 4: Extraction de la signature (Q1 à Q3)
+    encoder.process(fs, extract)
+    hashes = encoder.hashes 
 
+    # 5: Comparaison avec un morceau RANDOM de la base (Q6)
+    random_item = random.choice(database)
+    print(f"Comparaison avec le morceau de la base : {random_item['song']}")
 
+    # Création de l'objet de comparaison
+    matcher_random = Matching(hashes, random_item['hashcodes'])
 
-
-
-
+    # 6: Visualisation (Q5 et Q6)
+    print(f"Nombre de correspondances : {len(matcher_random.matching)}")
+    
+    # Nuage de points (doit être éparpillé)
+    matcher_random.display_scatterplot() 
+    
+    # Histogramme des offsets (doit être plat)
+    matcher_random.display_histogram() 
